@@ -16,6 +16,40 @@
     <button onclick="showSection('hash')">3. Hash</button>
   </div>
 
+  <!-- SYMMETRIC ENCRYPTION SECTION -->
+  <div id="symmetric" class="hidden">
+    <h2>Symmetric Encryption</h2>
+
+    <h3>Choose a Specific Algorithm</h3>
+    <div class="algorithm-buttons">
+      <button onclick="selectAlgorithm('DES')" class="algo-btn" id="btn-DES">DES</button>
+      <button onclick="selectAlgorithm('3DES')" class="algo-btn" id="btn-3DES">3DES</button>
+      <button onclick="selectAlgorithm('AES')" class="algo-btn" id="btn-AES">AES</button>
+    </div>
+
+    <p id="selectedAlgorithm" style="color: green; font-weight: bold;"></p>
+
+    <h3>Encryption Key</h3>
+    <textarea id="symmetricKey" placeholder="Enter or generate encryption key..."></textarea>
+
+    <button onclick="generateSymmetricKey()">Generate Key</button>
+
+    <h3>Input Data</h3>
+    <textarea id="symmetricInput" placeholder="Enter plaintext or ciphertext..."></textarea>
+
+    <button onclick="encryptSymmetricUI()">Encrypt</button>
+    <button onclick="decryptSymmetricUI()">Decrypt</button>
+
+    <h3>Output</h3>
+    <textarea id="symmetricOutput" readonly></textarea>
+
+    <button onclick="copyResult('symmetricOutput')">Copy Result</button>
+    <button onclick="tryAgainSymmetric()">Try Again</button>
+    <button onclick="goBack()">Back</button>
+
+    <p id="symmetricErrorMsg" class="error"></p>
+  </div>
+
   <div id="asymmetric" class="hidden">
     <h2>Asymmetric Encryption (RSA)</h2>
 
@@ -64,8 +98,8 @@ function tryAgain() {
   document.getElementById('errorMsg').innerText = '';
 }
 
-async function copyResult() {
-  const text = document.getElementById('outputData').value;
+async function copyResult(elementId = 'outputData') {
+  const text = document.getElementById(elementId).value;
   if (!text) return alert('Nothing to copy');
 
   if (navigator.clipboard && window.isSecureContext) {
@@ -80,6 +114,109 @@ async function copyResult() {
     document.body.removeChild(temp);
     alert('Copied (fallback)!');
   }
+}
+
+// ============ SYMMETRIC ENCRYPTION FUNCTIONS ============
+let selectedSymmetricAlgorithm = null;
+
+function selectAlgorithm(algorithm) {
+  selectedSymmetricAlgorithm = algorithm;
+  document.getElementById('selectedAlgorithm').innerText = '✓ Selected: ' + algorithm;
+  
+  // Highlight selected button
+  document.querySelectorAll('.algo-btn').forEach(btn => {
+    btn.style.backgroundColor = '';
+  });
+  document.getElementById('btn-' + algorithm).style.backgroundColor = '#4CAF50';
+  document.getElementById('btn-' + algorithm).style.color = 'white';
+}
+
+function generateSymmetricKey() {
+  if (!selectedSymmetricAlgorithm) {
+    alert('Please select an algorithm first!');
+    return;
+  }
+  
+  let keyLength;
+  switch(selectedSymmetricAlgorithm) {
+    case 'DES':
+      keyLength = 8; // 64 bits
+      break;
+    case '3DES':
+      keyLength = 24; // 192 bits (3 × 64)
+      break;
+    case 'AES':
+      keyLength = 32; // 256 bits
+      break;
+  }
+  
+  // Generate random key
+  const key = Array.from({length: keyLength}, () => 
+    Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+  ).join('');
+  
+  document.getElementById('symmetricKey').value = key;
+  clearSymmetricError();
+}
+
+function clearSymmetricError() {
+  document.getElementById('symmetricErrorMsg').innerText = '';
+}
+
+function showSymmetricError(msg) {
+  document.getElementById('symmetricErrorMsg').innerText = msg;
+}
+
+async function encryptSymmetricUI() {
+  try {
+    clearSymmetricError();
+    
+    if (!selectedSymmetricAlgorithm) {
+      throw new Error('Please select an algorithm first!');
+    }
+    
+    const inputText = document.getElementById('symmetricInput').value;
+    const key = document.getElementById('symmetricKey').value;
+    
+    if (!inputText || !key) {
+      throw new Error('Missing input data or key!');
+    }
+    
+    // Placeholder: actual encryption would use crypto library
+    const result = `[${selectedSymmetricAlgorithm} Encrypted] ${inputText}`;
+    document.getElementById('symmetricOutput').value = result;
+  } catch (e) {
+    showSymmetricError('Encryption failed: ' + e.message);
+  }
+}
+
+async function decryptSymmetricUI() {
+  try {
+    clearSymmetricError();
+    
+    if (!selectedSymmetricAlgorithm) {
+      throw new Error('Please select an algorithm first!');
+    }
+    
+    const inputText = document.getElementById('symmetricInput').value;
+    const key = document.getElementById('symmetricKey').value;
+    
+    if (!inputText || !key) {
+      throw new Error('Missing input data or key!');
+    }
+    
+    // Placeholder: actual decryption would use crypto library
+    const result = `[${selectedSymmetricAlgorithm} Decrypted] ${inputText}`;
+    document.getElementById('symmetricOutput').value = result;
+  } catch (e) {
+    showSymmetricError('Decryption failed: ' + e.message);
+  }
+}
+
+function tryAgainSymmetric() {
+  document.getElementById('symmetricInput').value = '';
+  document.getElementById('symmetricOutput').value = '';
+  document.getElementById('symmetricErrorMsg').innerText = '';
 }
 </script>
 </body>

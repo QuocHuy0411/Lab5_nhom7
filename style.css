@@ -1,22 +1,57 @@
 body {
   font-family: Arial;
   padding: 20px;
+  background-color: #f5f5f5;
 }
 
 .container {
   max-width: 800px;
   margin: auto;
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+}
+
+h2 {
+  color: #2196F3;
+  border-bottom: 2px solid #2196F3;
+  padding-bottom: 10px;
+}
+
+h3 {
+  color: #555;
+  margin-top: 15px;
 }
 
 textarea {
   width: 100%;
   margin: 10px 0;
   padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: monospace;
+  min-height: 80px;
 }
 
 button {
   margin: 5px;
-  padding: 10px;
+  padding: 10px 15px;
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:hover {
+  background-color: #1976D2;
 }
 
 .hidden {
@@ -24,5 +59,34 @@ button {
 }
 
 .error {
-  color: red;
+  color: #d32f2f;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.algorithm-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.algo-btn {
+  flex: 1;
+  padding: 12px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.algo-btn:hover {
+  background-color: #e0e0e0;
+  border-color: #2196F3;
+}
+
+.algo-btn.selected {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
 }
