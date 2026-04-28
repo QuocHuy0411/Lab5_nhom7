@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Cryptography Application</h1>
+
+  <div id="menu">
+    <h2>Select Cryptography Type</h2>
+    <button onclick="showSection('symmetric')">1. Symmetric</button>
+    <button onclick="showSection('asymmetric')">2. Asymmetric</button>
+    <button onclick="showSection('hash')">3. Hash</button>
+  </div>
+
+  <div id="asymmetric" class="hidden">
+    <h2>Asymmetric Encryption (RSA)</h2>
+
+    <button onclick="generateKeysUI()">Auto-generate Key</button>
+
+    <h3>Public Key</h3>
+    <textarea id="publicKey"></textarea>
+
+    <h3>Private Key</h3>
+    <textarea id="privateKey"></textarea>
+
+    <h3>Input Data</h3>
+    <textarea id="inputData" placeholder="Enter plaintext or ciphertext..."></textarea>
+
+    <button onclick="encryptUI()">Encrypt</button>
+    <button onclick="decryptUI()">Decrypt</button>
+
+    <h3>Output</h3>
+    <textarea id="outputData" readonly></textarea>
+
+    <button onclick="copyResult()">Copy Result</button>
+    <button onclick="tryAgain()">Try Again</button>
+    <button onclick="goBack()">Back</button>
+
+    <p id="errorMsg" class="error"></p>
+  </div>
+</div>
+
+<!-- 🔥 CHỖ QUAN TRỌNG ĐÃ ĐỔI -->
+<script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa.js"></script>
+<script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa-ui.js"></script>
+
+<script>
+function showSection(section) {
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById(section).classList.remove('hidden');
+}
+
+function goBack() {
+  location.reload();
+}
+
+function tryAgain() {
+  document.getElementById('inputData').value = '';
+  document.getElementById('outputData').value = '';
+  document.getElementById('errorMsg').innerText = '';
+}
+
+async function copyResult() {
+  const text = document.getElementById('outputData').value;
+  if (!text) return alert('Nothing to copy');
+
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    alert('Copied!');
+  } else {
+    const temp = document.createElement('textarea');
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand('copy');
+    document.body.removeChild(temp);
+    alert('Copied (fallback)!');
+  }
+}
+</script>
+</body>
+</html>
