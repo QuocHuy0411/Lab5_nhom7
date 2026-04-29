@@ -79,9 +79,12 @@
 </div>
 
 <!-- 🔥 CHỖ QUAN TRỌNG ĐÃ ĐỔI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="symmetric/des.js"></script>
+<script src="symmetric/3des.js"></script>
+<script src="symmetric/aes.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa-ui.js"></script>
-
 <script>
 function showSection(section) {
   document.getElementById('menu').classList.add('hidden');
@@ -176,15 +179,21 @@ async function encryptSymmetricUI() {
     }
     
     const inputText = document.getElementById('symmetricInput').value;
-    const key = document.getElementById('symmetricKey').value;
+    const keyHex = document.getElementById('symmetricKey').value;
     
-    if (!inputText || !key) {
+    if (!inputText || !keyHex) {
       throw new Error('Missing input data or key!');
     }
     
     // Placeholder: actual encryption would use crypto library
-    const result = `[${selectedSymmetricAlgorithm} Encrypted] ${inputText}`;
+    let result;
+    if (selectedSymmetricAlgorithm === 'DES') {
+      result = encryptDES(inputText, keyHex);
+    } else {
+      throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
+    }
     document.getElementById('symmetricOutput').value = result;
+      
   } catch (e) {
     showSymmetricError('Encryption failed: ' + e.message);
   }
@@ -199,14 +208,19 @@ async function decryptSymmetricUI() {
     }
     
     const inputText = document.getElementById('symmetricInput').value;
-    const key = document.getElementById('symmetricKey').value;
+    const keyHex = document.getElementById('symmetricKey').value.trim();
     
-    if (!inputText || !key) {
+    if (!inputText || !keyHex) {
       throw new Error('Missing input data or key!');
     }
     
     // Placeholder: actual decryption would use crypto library
-    const result = `[${selectedSymmetricAlgorithm} Decrypted] ${inputText}`;
+   let result;
+    if (selectedSymmetricAlgorithm === 'DES') {
+      result = decryptDES(inputText, keyHex);
+    } else {
+      throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
+    }
     document.getElementById('symmetricOutput').value = result;
   } catch (e) {
     showSymmetricError('Decryption failed: ' + e.message);
