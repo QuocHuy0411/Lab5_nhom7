@@ -29,6 +29,33 @@
 
     <p id="selectedAlgorithm" style="color: green; font-weight: bold;"></p>
 
+    <!-- AES-specific options -->
+    <div id="aes-options" class="hidden">
+      <h3>AES Configuration</h3>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; margin:10px 0 5px;">
+        <div>
+          <label style="font-weight:bold; color:#555; display:block; margin-bottom:4px;">Mode of Operation</label>
+          <select id="aes-mode" onchange="onAesModeChange()" style="padding:8px; border:1px solid #ddd; border-radius:4px; font-size:14px; cursor:pointer;">
+            <option value="CBC">CBC — Cipher Block Chaining</option>
+            <option value="ECB">ECB — Electronic Codebook</option>
+            <option value="CFB">CFB — Cipher Feedback</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-weight:bold; color:#555; display:block; margin-bottom:4px;">Key Size</label>
+          <select id="aes-keysize" style="padding:8px; border:1px solid #ddd; border-radius:4px; font-size:14px; cursor:pointer;">
+            <option value="128">128-bit (16 bytes)</option>
+            <option value="192">192-bit (24 bytes)</option>
+            <option value="256" selected>256-bit (32 bytes)</option>
+          </select>
+        </div>
+      </div>
+      <div id="aes-iv-row">
+        <h3>IV (Initialization Vector) <span style="font-size:13px; color:#888; font-weight:normal;">— để trống để tự động tạo khi Encrypt</span></h3>
+        <textarea id="aes-iv-input" placeholder="16 bytes hex (tùy chọn khi Encrypt — bắt buộc khi Decrypt)" style="min-height:50px;"></textarea>
+      </div>
+    </div>
+
     <h3>Encryption Key</h3>
     <textarea id="symmetricKey" placeholder="Enter or generate encryption key..."></textarea>
 
@@ -43,7 +70,13 @@
     <h3>Output</h3>
     <textarea id="symmetricOutput" readonly></textarea>
 
+    <div id="aes-iv-output-row" class="hidden">
+      <h3>IV đã dùng <span style="font-size:13px; color:#888; font-weight:normal;">(lưu lại để Decrypt)</span></h3>
+      <textarea id="aes-iv-output" readonly style="min-height:50px; background:#f0fff0;"></textarea>
+    </div>
+
     <button onclick="copyResult('symmetricOutput')">Copy Result</button>
+    <button id="btn-copy-iv" onclick="copyResult('aes-iv-output')" class="hidden">Copy IV</button>
     <button onclick="tryAgainSymmetric()">Try Again</button>
     <button onclick="goBack()">Back</button>
 
@@ -81,7 +114,6 @@
 <!-- 🔥 CHỖ QUAN TRỌNG ĐÃ ĐỔI -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script src="symmetric/des.js"></script>
-<script src="symmetric/3des.js"></script>
 <script src="symmetric/aes.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa-ui.js"></script>
@@ -125,13 +157,35 @@ let selectedSymmetricAlgorithm = null;
 function selectAlgorithm(algorithm) {
   selectedSymmetricAlgorithm = algorithm;
   document.getElementById('selectedAlgorithm').innerText = '✓ Selected: ' + algorithm;
-  
-  // Highlight selected button
+
   document.querySelectorAll('.algo-btn').forEach(btn => {
     btn.style.backgroundColor = '';
+    btn.style.color = '';
   });
   document.getElementById('btn-' + algorithm).style.backgroundColor = '#4CAF50';
   document.getElementById('btn-' + algorithm).style.color = 'white';
+
+  const aesOptions = document.getElementById('aes-options');
+  if (algorithm === 'AES') {
+    aesOptions.classList.remove('hidden');
+    onAesModeChange();
+  } else {
+    aesOptions.classList.add('hidden');
+    document.getElementById('aes-iv-output-row').classList.add('hidden');
+    document.getElementById('btn-copy-iv').classList.add('hidden');
+  }
+}
+
+function onAesModeChange() {
+  const mode = document.getElementById('aes-mode').value;
+  const ivRow = document.getElementById('aes-iv-row');
+  if (mode === 'ECB') {
+    ivRow.classList.add('hidden');
+  } else {
+    ivRow.classList.remove('hidden');
+  }
+  document.getElementById('aes-iv-output-row').classList.add('hidden');
+  document.getElementById('btn-copy-iv').classList.add('hidden');
 }
 
 function generateSymmetricKey() {
@@ -139,25 +193,19 @@ function generateSymmetricKey() {
     alert('Please select an algorithm first!');
     return;
   }
-  
-  let keyLength;
-  switch(selectedSymmetricAlgorithm) {
-    case 'DES':
-      keyLength = 8; // 64 bits
-      break;
-    case '3DES':
-      keyLength = 24; // 192 bits (3 × 64)
-      break;
-    case 'AES':
-      keyLength = 32; // 256 bits
-      break;
+
+  let key;
+  if (selectedSymmetricAlgorithm === 'AES') {
+    const keyBits = parseInt(document.getElementById('aes-keysize').value);
+    key = generateAESKey(keyBits);
+  } else {
+    const lengths = { DES: 8, '3DES': 24 };
+    const keyLength = lengths[selectedSymmetricAlgorithm] || 16;
+    key = Array.from({length: keyLength}, () =>
+      Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
+    ).join('');
   }
-  
-  // Generate random key
-  const key = Array.from({length: keyLength}, () => 
-    Math.floor(Math.random() * 256).toString(16).padStart(2, '0')
-  ).join('');
-  
+
   document.getElementById('symmetricKey').value = key;
   clearSymmetricError();
 }
@@ -173,27 +221,28 @@ function showSymmetricError(msg) {
 async function encryptSymmetricUI() {
   try {
     clearSymmetricError();
-    
-    if (!selectedSymmetricAlgorithm) {
-      throw new Error('Please select an algorithm first!');
-    }
-    
+    if (!selectedSymmetricAlgorithm) throw new Error('Please select an algorithm first!');
+
     const inputText = document.getElementById('symmetricInput').value;
     const keyHex = document.getElementById('symmetricKey').value;
-    
-    if (!inputText || !keyHex) {
-      throw new Error('Missing input data or key!');
-    }
-    
-    // Placeholder: actual encryption would use crypto library
-    let result;
+    if (!inputText || !keyHex) throw new Error('Missing input data or key!');
+
     if (selectedSymmetricAlgorithm === 'DES') {
-      result = encryptDES(inputText, keyHex);
+      document.getElementById('symmetricOutput').value = encryptDES(inputText, keyHex);
+    } else if (selectedSymmetricAlgorithm === 'AES') {
+      const mode = document.getElementById('aes-mode').value;
+      const keyBits = parseInt(document.getElementById('aes-keysize').value);
+      const ivInput = document.getElementById('aes-iv-input').value.trim();
+      const { cipherHex, ivHex } = encryptAES(inputText, keyHex, mode, keyBits, ivInput);
+      document.getElementById('symmetricOutput').value = cipherHex;
+      if (mode !== 'ECB') {
+        document.getElementById('aes-iv-output').value = ivHex;
+        document.getElementById('aes-iv-output-row').classList.remove('hidden');
+        document.getElementById('btn-copy-iv').classList.remove('hidden');
+      }
     } else {
       throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
     }
-    document.getElementById('symmetricOutput').value = result;
-      
   } catch (e) {
     showSymmetricError('Encryption failed: ' + e.message);
   }
@@ -202,26 +251,22 @@ async function encryptSymmetricUI() {
 async function decryptSymmetricUI() {
   try {
     clearSymmetricError();
-    
-    if (!selectedSymmetricAlgorithm) {
-      throw new Error('Please select an algorithm first!');
-    }
-    
+    if (!selectedSymmetricAlgorithm) throw new Error('Please select an algorithm first!');
+
     const inputText = document.getElementById('symmetricInput').value;
     const keyHex = document.getElementById('symmetricKey').value.trim();
-    
-    if (!inputText || !keyHex) {
-      throw new Error('Missing input data or key!');
-    }
-    
-    // Placeholder: actual decryption would use crypto library
-   let result;
+    if (!inputText || !keyHex) throw new Error('Missing input data or key!');
+
     if (selectedSymmetricAlgorithm === 'DES') {
-      result = decryptDES(inputText, keyHex);
+      document.getElementById('symmetricOutput').value = decryptDES(inputText, keyHex);
+    } else if (selectedSymmetricAlgorithm === 'AES') {
+      const mode = document.getElementById('aes-mode').value;
+      const keyBits = parseInt(document.getElementById('aes-keysize').value);
+      const ivHex = document.getElementById('aes-iv-input').value.trim();
+      document.getElementById('symmetricOutput').value = decryptAES(inputText, keyHex, mode, keyBits, ivHex);
     } else {
       throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
     }
-    document.getElementById('symmetricOutput').value = result;
   } catch (e) {
     showSymmetricError('Decryption failed: ' + e.message);
   }
@@ -231,6 +276,10 @@ function tryAgainSymmetric() {
   document.getElementById('symmetricInput').value = '';
   document.getElementById('symmetricOutput').value = '';
   document.getElementById('symmetricErrorMsg').innerText = '';
+  document.getElementById('aes-iv-input').value = '';
+  document.getElementById('aes-iv-output').value = '';
+  document.getElementById('aes-iv-output-row').classList.add('hidden');
+  document.getElementById('btn-copy-iv').classList.add('hidden');
 }
 </script>
 </body>
