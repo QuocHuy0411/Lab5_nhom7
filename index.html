@@ -109,6 +109,35 @@
 
     <p id="errorMsg" class="error"></p>
   </div>
+
+  <!-- HASH FUNCTIONS SECTION -->
+  <div id="hash" class="hidden">
+    <h2>3. Hash Functions</h2>
+
+    <h3>Input Data</h3>
+    <textarea id="hashInput" placeholder="Enter text to hash ..."></textarea>
+
+    <div class="algorithm-selection" style="margin: 15px 0;">
+      <label style="font-weight:bold; color:#555;">Select Algorithm:</label>
+      <select id="hashAlgo" style="padding:8px; border-radius:4px; width:100%; cursor:pointer;">
+        <option value="MD5">MD5 (128-bit)</option>
+        <option value="SHA256" selected>SHA-256 (256-bit)</option>
+      </select>
+    </div>
+
+    <button onclick="calculateHashUI()" class="btn-main">Calculate Hash</button>
+
+    <h3>Output</h3>
+    <textarea id="hashOutput" readonly "></textarea>
+
+    <div class="action-buttons">
+        <button onclick="copyResult('hashOutput')">Copy Result</button>
+        <button onclick="tryAgainHash()">Try Again</button>
+        <button onclick="goBack()">Back</button>
+    </div>
+
+    <p id="hashErrorMsg" class="error"></p>
+  </div>
 </div>
 
 <!-- 🔥 CHỖ QUAN TRỌNG ĐÃ ĐỔI -->
@@ -117,6 +146,8 @@
 <script src="symmetric/aes.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa-ui.js"></script>
+<script src="hash/hash.js"></script>
+<script src="hash/hash-ui.js"></script>
 <script>
 function showSection(section) {
   document.getElementById('menu').classList.add('hidden');
