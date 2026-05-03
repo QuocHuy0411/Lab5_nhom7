@@ -12,6 +12,13 @@ A web-based cryptography application that provides various encryption and decryp
 - Real-time error handling and validation
 
 ### 2. **Symmetric Encryption** (Coming Soon)
+DES:
+    - Generate Encryption Key
+    - Encrypt plaintext 
+    - Decrypt ciphertext 
+    - Copy encrypted/decrypted results to clipboard
+    - Real-time error handling and validation
+
 
 ### 3. **Hash Functions** (Coming Soon)
 
@@ -55,19 +62,29 @@ Lab5_Nhom7/
 
 1. **Select Cryptography Type:** Click on one of the three options (Symmetric, Asymmetric, Hash)
 
-2. **For RSA Encryption:**
+2. **For DES:**
+    Encryption:
+   - Click "Auto-generate Key" to create a key pair
+   - Enter plaintext in "Input Data"
+   - Click "Encrypt" to encrypt 
+    Decryption:
+   - Paste the ciphertext in "Input Data"
+   - Click "Decrypt"
+   - View the decrypted plaintext in the output area
+
+3. **For RSA Encryption:**
    - Click "Auto-generate Key" to create a key pair
    - Copy the public/private keys or use the generated ones
    - Enter plaintext in "Input Data"
    - Click "Encrypt" to encrypt using the public key
    - Copy the encrypted result or use it for decryption
 
-3. **For RSA Decryption:**
+4. **For RSA Decryption:**
    - Paste the ciphertext in "Input Data"
    - Click "Decrypt" using the private key
    - View the decrypted plaintext in the output area
 
-4. **Additional Actions:**
+5. **Additional Actions:**
    - Click "Copy Result" to copy output to clipboard
    - Click "Try Again" to clear input fields
    - Click "Back" to return to menu
@@ -81,6 +98,7 @@ Lab5_Nhom7/
 ## Author
 
 N23DCCN162 - Nguyễn Ngọc Quốc Huy
+N23DCCN158 - Nguyễn Lê Hoàng Học
 
 ## License
 
