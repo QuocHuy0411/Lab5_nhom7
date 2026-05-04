@@ -144,6 +144,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
 <script src="symmetric/des.js"></script>
 <script src="symmetric/aes.js"></script>
+<script src="symmetric/3des.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa.js"></script>
 <script src="5_N23DCCN162_NguyenNgocQuocHuy/rsa-ui.js"></script>
 <script src="hash/hash.js"></script>
@@ -271,6 +272,8 @@ async function encryptSymmetricUI() {
         document.getElementById('aes-iv-output-row').classList.remove('hidden');
         document.getElementById('btn-copy-iv').classList.remove('hidden');
       }
+    } else if (selectedSymmetricAlgorithm === '3DES') {
+      document.getElementById('symmetricOutput').value = encrypt3DES(inputText, keyHex);
     } else {
       throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
     }
@@ -295,6 +298,8 @@ async function decryptSymmetricUI() {
       const keyBits = parseInt(document.getElementById('aes-keysize').value);
       const ivHex = document.getElementById('aes-iv-input').value.trim();
       document.getElementById('symmetricOutput').value = decryptAES(inputText, keyHex, mode, keyBits, ivHex);
+    } else if (selectedSymmetricAlgorithm === '3DES') {
+      document.getElementById('symmetricOutput').value = decrypt3DES(inputText, keyHex);
     } else {
       throw new Error(selectedSymmetricAlgorithm + ' not implemented yet.');
     }
